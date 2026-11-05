@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="pt-MZ">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#f3f7fa">
+    <title>Entrar | pfunaMati</title>
+    <link rel="stylesheet" href="/css/app.css">
+    <script type="module" src="/js/login.js"></script>
+</head>
+<body class="login-page">
+<main class="login-layout">
+    <section class="login-story" aria-label="Sobre o pfunaMati">
+        <a class="brand brand-light" href="/login.html">
+            <span class="brand-symbol" aria-hidden="true">
+                <svg viewBox="0 0 36 36"><path d="M18 3C13.5 9.5 7 15.1 7 22a11 11 0 0 0 22 0C29 15.1 22.5 9.5 18 3Z"/><path d="M12.5 22.3c.4 3 2.4 4.8 5.3 5.2"/></svg>
+            </span>
+            <span class="brand-name">pfuna<span>Mati</span><small>GESTÃO DE ÁGUA</small></span>
+        </a>
+        <div class="story-copy">
+            <span class="story-label"><i></i> OPERAÇÕES DE ÁGUA, COM CLAREZA</span>
+            <h1>Um serviço essencial.<br><span>Uma gestão mais simples.</span></h1>
+            <p>Clientes, ligações e leituras num só lugar. Informação organizada para equipas que mantêm a água a chegar às comunidades.</p>
+        </div>
+        <div class="story-bottom"><span>Uma plataforma para uma gestão sustentável.</span><span>Maputo · Moçambique</span></div>
+        <div class="story-watermark" aria-hidden="true"></div>
+    </section>
+
+    <section class="login-panel">
+        <div class="login-card">
+            <span class="section-kicker">BEM-VINDO DE VOLTA</span>
+            <h2>Iniciar sessão</h2>
+            <p class="login-subtitle">Aceda ao seu espaço de trabalho.</p>
+            <form id="login-form" class="login-form">
+                <label class="form-label" for="username">Nome de utilizador</label>
+                <div class="input-wrap">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M5 21a7 7 0 0 1 14 0"/></svg>
+                    <input id="username" name="username" type="text" autocomplete="username" placeholder="O seu utilizador" required autofocus>
+                </div>
+                <div class="password-label">
+                    <label class="form-label" for="password">Palavra-passe</label>
+                </div>
+                <div class="input-wrap">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3M12 14v3"/></svg>
+                    <input id="password" name="password" type="password" autocomplete="current-password" placeholder="Introduza a sua palavra-passe" required>
+                    <button class="password-toggle" id="toggle-password" type="button" aria-label="Mostrar palavra-passe">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>
+                    </button>
+                </div>
+                <p id="login-error" class="login-error" role="alert" hidden></p>
+                <button class="button button-primary login-submit" id="login-submit" type="submit">
+                    <span>Entrar no sistema</span>
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+                </button>
+            </form>
+            <div class="login-security">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22s8-4 8-11V5l-8-3-8 3v6c0 7 8 11 8 11Z"/><path d="m9 12 2 2 4-4"/></svg>
+                <span>Acesso protegido por sessão segura e permissões de utilizador.</span>
+            </div>
+        </div>
+        <footer class="login-footer">© <span id="current-year"></span> pfunaMati <span>·</span> Sistema de gestão de abastecimento de água</footer>
+    </section>
+</main>
+</body>
+</html>

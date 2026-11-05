@@ -1,0 +1,18 @@
+spring:
+  application:
+    name: pfuna-mati
+  datasource:
+    url: ${DB_URL:jdbc:mysql://localhost:3306/abastecimento?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Africa/Maputo}
+    username: ${DB_USERNAME:abastecimento_app}
+    password: ${DB_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+  sql:
+    init:
+      mode: always
+
+server:
+  port: 8080

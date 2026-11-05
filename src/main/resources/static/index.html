@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="pt-MZ">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#f3f7fa">
+    <meta name="description" content="pfunaMati - gestão do abastecimento de água.">
+    <title>pfunaMati | Gestão de água</title>
+    <link rel="stylesheet" href="/css/app.css">
+    <script type="module" src="/js/app.js"></script>
+</head>
+<body>
+<div class="shell">
+    <aside class="sidebar">
+        <a class="brand" href="/" aria-label="pfunaMati, início">
+            <span class="brand-symbol" aria-hidden="true">
+                <svg viewBox="0 0 36 36"><path d="M18 3C13.5 9.5 7 15.1 7 22a11 11 0 0 0 22 0C29 15.1 22.5 9.5 18 3Z"/><path d="M12.5 22.3c.4 3 2.4 4.8 5.3 5.2"/></svg>
+            </span>
+            <span class="brand-name">pfuna<span>Mati</span><small>GESTÃO DE ÁGUA</small></span>
+        </a>
+
+        <div class="workspace-label">ESPAÇO DE TRABALHO</div>
+        <nav id="main-navigation" class="main-navigation" aria-label="Navegação principal"></nav>
+
+        <div class="sidebar-bottom">
+            <div class="water-card">
+                <span class="water-card-icon" aria-hidden="true">↗</span>
+                <strong>Água bem gerida.<br>Comunidades servidas.</strong>
+                <span>Uma visão clara de cada ligação.</span>
+            </div>
+            <span class="sidebar-version">pfunaMati <span>•</span> versão de demonstração</span>
+        </div>
+    </aside>
+
+    <main class="main-area">
+        <header class="topbar">
+            <div class="topbar-breadcrumb">
+                <span>Operações</span><span class="slash">/</span><strong id="current-section">Visão geral</strong>
+            </div>
+            <div class="topbar-actions">
+                <span class="system-indicator"><i></i><span>Sistema activo</span></span>
+                <span class="topbar-divider"></span>
+                <div class="account-summary">
+                    <span class="account-avatar" id="account-avatar">PM</span>
+                    <span class="account-copy">
+                        <strong id="account-name">A carregar...</strong>
+                        <small id="account-role">A verificar sessão</small>
+                    </span>
+                </div>
+                <button class="icon-button logout-button" id="logout-button" type="button" title="Terminar sessão" aria-label="Terminar sessão">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 17l5-5-5-5M15 12H3M12 3h6a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-6"/></svg>
+                </button>
+            </div>
+        </header>
+
+        <section id="workspace" class="workspace" aria-live="polite">
+            <div class="loading-state"><span class="spinner"></span><span>A preparar o espaço de trabalho...</span></div>
+        </section>
+        <footer class="main-footer">
+            <span>pfunaMati <span class="footer-dot">•</span> Gestão responsável dos serviços de água</span>
+            <span>Maputo, Moçambique</span>
+        </footer>
+    </main>
+</div>
+
+<dialog id="app-dialog" class="app-dialog">
+    <form id="dialog-form" class="dialog-form">
+        <div class="dialog-top">
+            <div><span class="section-kicker" id="dialog-kicker">REGISTO</span><h2 id="dialog-title">Novo registo</h2></div>
+            <button type="button" class="icon-button" id="dialog-close" aria-label="Fechar">×</button>
+        </div>
+        <div id="dialog-fields" class="dialog-fields"></div>
+        <p id="dialog-error" class="inline-error" role="alert" hidden></p>
+        <div class="dialog-actions">
+            <button type="button" class="button button-muted" id="dialog-cancel">Cancelar</button>
+            <button type="submit" class="button button-primary" id="dialog-submit">Guardar</button>
+        </div>
+    </form>
+</dialog>
+<div id="toast-container" class="toast-container" aria-live="polite" aria-atomic="true"></div>
+</body>
+</html>
