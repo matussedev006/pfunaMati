@@ -30,6 +30,7 @@ const navGroups = {
             items: [
                 ["dashboard", "Visão geral", "M4 13h6V3H4v10Zm10 8h6V11h-6v10ZM4 21h6v-4H4v4Zm10-14h6V3h-6v4Z"],
                 ["leituras", "Leituras", "M12 3v18m6-14H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"],
+                ["facturas", "Facturação", "M6 2h9l5 5v15H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Zm8 0v6h6M8 13h8m-8 4h8"],
             ],
         },
         {
@@ -57,6 +58,7 @@ const navGroups = {
                 ["portal", "Resumo", "M4 13h6V3H4v10Zm10 8h6V11h-6v10ZM4 21h6v-4H4v4Zm10-14h6V3h-6v4Z"],
                 ["portal-ligacoes", "As minhas ligações", "M3 7h18M5 7l2-4h10l2 4m-14 0 2 14h10l2-14M9 11v6m6-6v6"],
                 ["portal-leituras", "As minhas leituras", "M12 3v18m6-14H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"],
+                ["portal-facturas", "As minhas facturas", "M6 2h9l5 5v15H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Zm8 0v6h6M8 13h8m-8 4h8"],
             ],
         },
     ],
@@ -151,7 +153,6 @@ function renderNavigation() {
         heading.textContent = "EM DESENVOLVIMENTO";
         future.append(heading);
         for (const [label, path] of [
-            ["Facturação", "M6 2h9l5 5v15H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Zm8 0v6h6M8 13h8m-8 4h8"],
             ["Pagamentos", "M3 6h18v13H3zM3 10h18m-14 5h4"],
         ]) {
             const item = document.createElement("span");
@@ -182,7 +183,7 @@ function metricCard(label, value, note, iconPath, tone = "") {
 function tableMarkup(headers, rows, emptyMessage) {
     const headerMarkup = headers.map((header) => `<th scope="col">${h(header)}</th>`).join("");
     const rowMarkup = rows.length
-        ? rows.join("")
+        ? rows.map((row) => (typeof row === "object" && row !== null && row.html ? row.html : String(row))).join("")
         : `<tr><td class="table-empty" colspan="${headers.length}">${h(emptyMessage)}</td></tr>`;
     return `<div class="table-scroll"><table><thead><tr>${headerMarkup}</tr></thead><tbody>${rowMarkup}</tbody></table></div>`;
 }
@@ -210,7 +211,8 @@ function attachTable(rows, emptyMessage, search = true) {
         const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
         page = Math.min(page, pageCount);
         const start = (page - 1) * PAGE_SIZE;
-        content.innerHTML = tableMarkup(headers, filtered.slice(start, start + PAGE_SIZE), emptyMessage);
+        const currentSlice = filtered.slice(start, start + PAGE_SIZE).map((r) => (r && r.html ? r.html : r));
+        content.innerHTML = tableMarkup(headers, currentSlice, emptyMessage);
         caption.textContent = filtered.length === 0
             ? "0 registos"
             : `A mostrar ${start + 1}–${Math.min(start + PAGE_SIZE, filtered.length)} de ${filtered.length} registos`;
@@ -234,8 +236,10 @@ function attachTable(rows, emptyMessage, search = true) {
     const searchInput = document.querySelector("#table-search");
     if (search && searchInput) {
         searchInput.addEventListener("input", () => {
-            const term = normalize(searchInput.value);
-            filtered = rows.filter((row) => normalize(row.text).includes(term));
+            const term = normalize(searchInput.value.trim());
+            filtered = term
+                ? rows.filter((row) => normalize(row.text || row.html || String(row)).includes(term))
+                : rows;
             page = 1;
             render();
         });
@@ -283,9 +287,11 @@ async function renderCurrentView() {
         contadores: "Contadores",
         tarifas: "Tarifas",
         utilizadores: "Utilizadores",
+        facturas: "Facturação",
         portal: "A minha conta",
         "portal-ligacoes": "As minhas ligações",
         "portal-leituras": "As minhas leituras",
+        "portal-facturas": "As minhas facturas",
     };
     setHeader(viewTitles[state.view] || "Visão geral");
 
@@ -302,6 +308,7 @@ async function renderCurrentView() {
         contadores: renderMeters,
         tarifas: renderTariffs,
         utilizadores: renderUsers,
+        facturas: renderInvoices,
     };
     const render = views[state.view] || renderDashboard;
     await loadView(render);
@@ -320,6 +327,9 @@ async function renderDashboard() {
     const readingAction = state.user.perfis.some((role) => ["ADMIN", "LEITOR"].includes(role))
         ? `<button class="quick-action" data-action="new-reading"><span>↗</span><strong>Registar leitura</strong><span>›</span></button>`
         : "";
+    const invoiceAction = state.user.perfis.some((role) => ["ADMIN", "LEITOR"].includes(role))
+        ? `<button class="quick-action" data-view="facturas"><span>📄</span><strong>Gerir facturação</strong><span>›</span></button>`
+        : "";
 
     workspace.innerHTML = `
         ${pageHead("PAINEL DE OPERAÇÕES", `Bom dia, ${state.user.nome.split(" ")[0]}`, "Acompanhe os principais indicadores e a actividade recente do serviço.")}
@@ -336,7 +346,7 @@ async function renderDashboard() {
             </section>
             <section class="panel">
                 <div class="panel-head"><div><h2>Acesso rápido</h2><p>Acções disponíveis para o seu perfil</p></div></div>
-                <div class="panel-body"><div class="quick-actions">${quickActions}${readingAction}<button class="quick-action" data-view="clientes"><span>◎</span><strong>Consultar clientes</strong><span>›</span></button></div>
+                <div class="panel-body"><div class="quick-actions">${quickActions}${readingAction}${invoiceAction}<button class="quick-action" data-view="clientes"><span>◎</span><strong>Consultar clientes</strong><span>›</span></button></div>
                     <div class="notice-card" style="margin-top:13px"><span class="notice-icon">i</span><div><strong>Visão operacional</strong><p>O volume mensal é calculado pela diferença entre leituras acumuladas do mesmo contador.</p></div></div>
                 </div>
             </section>
@@ -481,12 +491,149 @@ async function renderUsers() {
     document.querySelector("#create-user").addEventListener("click", () => openUserForm(clients));
 }
 
+async function renderInvoices() {
+    const [invoices, summary, meters, tariffs] = await Promise.all([
+        api.get("/facturas"),
+        api.get("/facturas/resumo"),
+        api.get("/contadores"),
+        api.get("/tarifas"),
+    ]);
+    state.meters = meters;
+    const canCreate = !state.user.perfis.includes("CLIENTE");
+    const isAdmin = state.user.perfis.includes("ADMIN");
+
+    const action = canCreate
+        ? `<button class="button button-primary" id="create-invoice"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg> Emitir factura</button>`
+        : "";
+
+    const rows = invoices.map((inv) => ({
+        text: `${inv.numero} ${inv.clienteNome} ${inv.clienteDocumento} ${inv.ligacaoCodigo} ${inv.contadorNumeroSerie} ${inv.estado}`,
+        html: `<tr>
+            <td><span class="table-primary">${h(inv.numero)}</span><span class="table-secondary">${h(formatDate(inv.dataEmissao))}</span></td>
+            <td><span class="table-primary">${h(inv.clienteNome)}</span><span class="table-secondary">${h(inv.clienteDocumento)}</span></td>
+            <td>${h(inv.ligacaoCodigo)}</td>
+            <td>${h(inv.contadorNumeroSerie)}</td>
+            <td>${h(formatDate(inv.periodoInicio, { year: false }))} — ${h(formatDate(inv.periodoFim))}</td>
+            <td><span class="table-primary">${h(formatVolume(inv.volumeM3))}</span></td>
+            <td><span class="table-primary">${h(formatMoney(inv.valorTotal))}</span><span class="table-secondary">Fixa: ${h(formatMoney(inv.taxaFixa))}</span></td>
+            <td><span class="badge ${inv.estado === "PAGA" ? "" : inv.estado === "PENDENTE" ? "warning" : "neutral"}">${h(inv.estado)}</span></td>
+            <td>
+                ${isAdmin && inv.estado === "PENDENTE" ? `<button class="button-xs pay-invoice" data-id="${inv.id}" type="button">Liquidar</button>` : ""}
+                ${canCreate && inv.estado === "PENDENTE" ? `<button class="button-xs remind-invoice" data-id="${inv.id}" type="button" style="margin-left:4px; border-color:#d49b28; color:#9c6e11; background:#fef8ea;">Lembrete</button>` : ""}
+                ${inv.estado === "PAGA" ? "—" : ""}
+            </td>
+        </tr>`,
+    }));
+
+    workspace.innerHTML = `${pageHead("GESTÃO DE FACTURAÇÃO", "Facturação", "Consulte e emita facturas de consumo de água aos clientes.", action)}
+        <div class="metrics-grid">
+            ${metricCard("Total facturado", formatMoney(summary.totalFacturado), `${summary.totalFacturas} facturas emitidas`, "M12 2v20m5-15a4 4 0 0 0-4-2H9a4 4 0 0 0 0 8h6a4 4 0 0 1 0 8h-4a4 4 0 0 1-4-2", "teal")}
+            ${metricCard("Facturas pendentes", formatMoney(summary.totalPendente), `${summary.facturasPendentes} a aguardar liquidação`, "M12 8v4l3 3m6-3a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z", "amber")}
+            ${metricCard("Facturas liquidadas", formatMoney(summary.totalPago), `${summary.facturasPagas} valores confirmados`, "M9 12l2 2 4-4m6 2a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z")}
+            ${metricCard("Volume medido", formatVolume(summary.volumeTotalM3), "m³ facturados globalmente", "M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z", "blue")}
+        </div>
+        ${dataTablePanel({
+            title: "Histórico de facturas",
+            description: `${invoices.length} facturas registadas no sistema`,
+            headers: ["NÚMERO / DATA", "CLIENTE", "LIGAÇÃO", "CONTADOR", "PERÍODO", "CONSUMO", "TOTAL", "ESTADO", "ACÇÕES"],
+            rows: rows.map((r) => r.html),
+            empty: "Não existem facturas registadas no sistema.",
+            searchPlaceholder: "Pesquisar por número, cliente, documento ou ligação...",
+        })}`;
+
+    attachTable(rows, "Não existem facturas registadas no sistema.");
+
+    if (canCreate) {
+        document.querySelector("#create-invoice")?.addEventListener("click", () => openInvoiceForm(meters, tariffs));
+    }
+
+    workspace.querySelectorAll(".pay-invoice").forEach((button) => {
+        button.addEventListener("click", async () => {
+            if (!confirm("Confirmar a liquidação do pagamento desta factura?")) return;
+            try {
+                await api.post(`/facturas/${button.dataset.id}/liquidar`);
+                showToast("Factura liquidada com sucesso.");
+                await renderCurrentView();
+            } catch (error) {
+                showToast(error.message || "Erro ao liquidar factura.", true);
+            }
+        });
+    });
+
+    workspace.querySelectorAll(".remind-invoice").forEach((button) => {
+        button.addEventListener("click", async () => {
+            try {
+                const res = await api.post(`/facturas/${button.dataset.id}/lembrete`);
+                showToast(res.mensagem || "Lembrete enviado com sucesso.");
+            } catch (error) {
+                showToast(error.message || "Erro ao enviar lembrete.", true);
+            }
+        });
+    });
+}
+
+function openInvoiceForm(meters, tariffs) {
+    const activeMeters = meters.filter((m) => m.estado === "ACTIVO");
+    if (!activeMeters.length) {
+        showToast("Não existem contadores activos disponíveis.", true);
+        return;
+    }
+    const meterOptions = activeMeters.map((m) => ({
+        value: m.id,
+        label: `${m.numeroSerie} · ${m.codigoLigacao} (${m.cliente})`,
+    }));
+
+    const activeTariffs = tariffs.filter((t) => t.activa);
+    const tariffOptions = activeTariffs.map((t) => ({
+        value: t.id,
+        label: `${t.nome} (Fixa: ${formatMoney(t.taxaFixa)} · ${formatMoney(t.precoPorM3)}/m³)`,
+    }));
+
+    const today = new Date().toISOString().slice(0, 10);
+    const dueDate = new Date(Date.now() + 15 * 86400000).toISOString().slice(0, 10);
+
+    openDialog("Emitir nova factura", [
+        field("Contador / Ligação", "contadorId", { type: "select", required: true, wide: true, options: meterOptions }),
+        field("Tarifa aplicável", "tarifaId", { type: "select", required: true, wide: true, options: tariffOptions }),
+        field("Leitura inicial (m³)", "leituraInicialM3", { type: "number", step: "0.001", min: 0, placeholder: "Opcional (calculada automaticamente se vazia)" }),
+        field("Leitura final (m³)", "leituraFinalM3", { type: "number", step: "0.001", min: 0, placeholder: "Opcional (última medição se vazia)" }),
+        field("Data de emissão", "dataEmissao", { type: "date", required: true, value: today }),
+        field("Data de vencimento", "dataVencimento", { type: "date", required: true, value: dueDate }),
+    ], async (data) => {
+        if (!data.contadorId) {
+            throw new Error("Seleccione o contador para emitir a factura.");
+        }
+        await api.post("/facturas/gerar", {
+            contadorId: data.contadorId,
+            tarifaId: data.tarifaId || null,
+            leituraInicialM3: data.leituraInicialM3 ? Number(data.leituraInicialM3) : null,
+            leituraFinalM3: data.leituraFinalM3 ? Number(data.leituraFinalM3) : null,
+            dataEmissao: data.dataEmissao || null,
+            dataVencimento: data.dataVencimento || null,
+        });
+        showToast("Factura emitida com sucesso.");
+        await renderCurrentView();
+    });
+}
+
 async function renderPortal(view) {
-    const [clients, readings] = await Promise.all([
+    const [clients, readings, invoices, alerts] = await Promise.all([
         api.get("/portal/clientes"),
         api.get("/portal/leituras"),
+        api.get("/portal/facturas"),
+        api.get("/portal/alertas"),
     ]);
     const connections = clients.flatMap((client) => client.ligacoes.map((connection) => ({ ...connection, cliente: client.nome })));
+
+    const alertBanner = alerts && alerts.length > 0
+        ? `<div class="notice-card" style="margin-bottom:15px; border-left:4px solid var(--amber); background:#fffcf4;">
+            <span class="notice-icon" style="color:var(--amber); background:#fef4dc;">⚠️</span>
+            <div>
+                <strong style="color:#785800;">Avisos de Vencimento de Facturas</strong>
+                ${alerts.map((a) => `<p style="margin-top:4px; color:#6d511a;">${h(a.mensagem)}</p>`).join("")}
+            </div>
+        </div>`
+        : "";
 
     if (view === "portal-ligacoes") {
         const rows = connections.map((item) => ({
@@ -509,16 +656,51 @@ async function renderPortal(view) {
         return;
     }
 
+    if (view === "portal-facturas") {
+        const rows = invoices.map((inv) => ({
+            text: `${inv.numero} ${inv.ligacaoCodigo} ${inv.contadorNumeroSerie} ${inv.estado}`,
+            html: `<tr>
+                <td><span class="table-primary">${h(inv.numero)}</span><span class="table-secondary">${h(formatDate(inv.dataEmissao))}</span></td>
+                <td>${h(inv.ligacaoCodigo)}</td>
+                <td>${h(inv.contadorNumeroSerie)}</td>
+                <td>${h(formatDate(inv.periodoInicio, { year: false }))} — ${h(formatDate(inv.periodoFim))}</td>
+                <td>${h(formatVolume(inv.volumeM3))}</td>
+                <td>${h(formatMoney(inv.taxaFixa))}</td>
+                <td><strong>${h(formatMoney(inv.valorTotal))}</strong></td>
+                <td>${h(formatDate(inv.dataVencimento))}</td>
+                <td><span class="badge ${inv.estado === "PAGA" ? "" : "warning"}">${h(inv.estado)}</span></td>
+            </tr>`,
+        }));
+        workspace.innerHTML = `${pageHead("ÁREA DO CLIENTE", "As minhas facturas", "Histórico e estado das suas facturas de consumo de água.")}
+            ${alertBanner}
+            ${dataTablePanel({
+                title: "Facturas da conta",
+                description: `${invoices.length} facturas registadas`,
+                headers: ["NÚMERO", "LIGAÇÃO", "CONTADOR", "PERÍODO", "CONSUMO", "TAXA FIXA", "TOTAL", "VENCIMENTO", "ESTADO"],
+                rows: rows.map((r) => r.html),
+                empty: "Ainda não existem facturas emitidas para as suas ligações.",
+                searchPlaceholder: "Pesquisar por número ou ligação...",
+            })}`;
+        attachTable(rows, "Ainda não existem facturas emitidas para as suas ligações.");
+        return;
+    }
+
     const totalConnections = connections.length;
+    const pendingInvoices = invoices.filter((i) => i.estado === "PENDENTE");
+    const totalPendingAmount = pendingInvoices.reduce((acc, i) => acc + (Number(i.valorTotal) || 0), 0);
     const latest = readings.slice(0, 5);
+
     workspace.innerHTML = `${pageHead("ÁREA DO CLIENTE", `Olá, ${state.user.nome.split(" ")[0]}`, "Consulte a informação das ligações de água associadas à sua conta.")}
+        ${alertBanner}
         <div class="metrics-grid">
             ${metricCard("Ligações associadas", totalConnections, "pontos de abastecimento", "M3 7h18M5 7l2-4h10l2 4m-14 0 2 14h10l2-14M9 11v6m6-6v6")}
             ${metricCard("Leituras recentes", readings.length, "registos disponíveis", "M12 3v18m6-14H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6", "teal")}
+            ${metricCard("Facturas pendentes", pendingInvoices.length, "a regularizar", "M12 8v4l3 3m6-3a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z", pendingInvoices.length > 0 ? "amber" : "teal")}
+            ${metricCard("Total a regularizar", formatMoney(totalPendingAmount), "valor em aberto", "M12 2v20m5-15a4 4 0 0 0-4-2H9a4 4 0 0 0 0 8h6a4 4 0 0 1 0 8h-4a4 4 0 0 1-4-2", pendingInvoices.length > 0 ? "gold" : "blue")}
         </div>
         <div class="content-grid">
-            <section class="panel"><div class="panel-head"><div><h2>As minhas ligações</h2><p>Endereços de abastecimento associados</p></div><button class="button-link" data-view="portal-ligacoes">Ver todas →</button></div>
-                <div class="panel-body activity-list">${connections.slice(0, 5).map((item) => `<div class="activity-item"><span class="activity-marker">⌂</span><span class="activity-copy"><strong>${h(item.codigo)} · ${h(item.bairro)}</strong><span>${h(item.endereco)}, ${h(item.cidade)}</span></span><span class="badge">${h(item.estado)}</span></div>`).join("") || `<div class="empty-state">Não existem ligações associadas à sua conta.</div>`}</div>
+            <section class="panel"><div class="panel-head"><div><h2>As minhas facturas recentes</h2><p>Estado e valores a pagamento</p></div><button class="button-link" data-view="portal-facturas">Ver todas →</button></div>
+                <div class="panel-body activity-list">${invoices.slice(0, 5).map((item) => `<div class="activity-item"><span class="activity-marker">📄</span><span class="activity-copy"><strong>${h(item.numero)} · ${h(item.ligacaoCodigo)}</strong><span>Vence em ${h(formatDate(item.dataVencimento))}</span></span><span class="badge ${item.estado === "PAGA" ? "" : "warning"}">${h(item.estado)}</span></div>`).join("") || `<div class="empty-state">Ainda não existem facturas para as suas ligações.</div>`}</div>
             </section>
             <section class="panel"><div class="panel-head"><div><h2>Últimas leituras</h2><p>Actualizações dos seus contadores</p></div><button class="button-link" data-view="portal-leituras">Ver todas →</button></div>
                 <div class="panel-body activity-list">${latest.map((item) => `<div class="activity-item"><span class="activity-marker">↗</span><span class="activity-copy"><strong>${h(item.codigoLigacao)} · ${h(item.numeroSerie)}</strong><span>${h(formatDate(item.dataLeitura, { time: true }))}</span></span><span class="activity-value">${h(formatVolume(item.valorM3))}</span></div>`).join("") || `<div class="empty-state">Ainda não há leituras registadas.</div>`}</div>

@@ -80,6 +80,26 @@ public class Utilizador implements UserDetails {
         return nome;
     }
 
+    public String getNomeUtilizador() {
+        return nomeUtilizador;
+    }
+
+    public String getSenhaHash() {
+        return senhaHash;
+    }
+
+    public boolean isAtivo() {
+        return ativo;
+    }
+
+    public Instant getDataCriacao() {
+        return dataCriacao;
+    }
+
+    public Set<Perfil> getPerfis() {
+        return Set.copyOf(perfis);
+    }
+
     public String getEmail() {
         return email;
     }

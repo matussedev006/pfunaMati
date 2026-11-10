@@ -11,16 +11,16 @@ INSERT IGNORE INTO utilizadores
 VALUES
     (UUID_TO_BIN(UUID()), 'Administrador do Sistema', 'admin',
      'admin@abastecimento.example.test',
-     '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', TRUE),
+     '$2a$10$KJ5tXxBbOi1xed/ZLRbyTOyuJzekbhKVneyrotLSMTCXrJ1RRBdYq', TRUE),
     (UUID_TO_BIN(UUID()), 'Maria Isabel Macuacua', 'maria.leitora',
      'maria.leitora@abastecimento.example.test',
-     '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', TRUE),
+     '$2a$10$KJ5tXxBbOi1xed/ZLRbyTOyuJzekbhKVneyrotLSMTCXrJ1RRBdYq', TRUE),
     (UUID_TO_BIN(UUID()), 'Helena Teresa Cossa', 'helena.cliente',
      'helena.cossa@abastecimento.example.test',
-     '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', TRUE),
+     '$2a$10$KJ5tXxBbOi1xed/ZLRbyTOyuJzekbhKVneyrotLSMTCXrJ1RRBdYq', TRUE),
     (UUID_TO_BIN(UUID()), 'Joao Ernesto Mucavele', 'joao.cliente',
      'joao.mucavele@abastecimento.example.test',
-     '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', TRUE);
+     '$2a$10$KJ5tXxBbOi1xed/ZLRbyTOyuJzekbhKVneyrotLSMTCXrJ1RRBdYq', TRUE);
 
 INSERT IGNORE INTO clientes (id, nome, documento, email, telefone) VALUES
     (UUID_TO_BIN(UUID()), 'Helena Teresa Cossa', 'BI-DEMO-0001',
@@ -163,3 +163,40 @@ VALUES
      150.00, 70.00, '2025-01-01', TRUE),
     (UUID_TO_BIN(UUID()), 'Comercial', 'Tarifa comercial de demonstracao.',
      500.00, 120.00, '2025-01-01', TRUE);
+
+-- Leituras de demonstracao
+INSERT IGNORE INTO leituras
+    (id, contador_id, utilizador_id, data_leitura, valor_m3, tipo, observacao)
+SELECT UUID_TO_BIN(UUID()), c.id, u.id, '2026-01-01 08:00:00', 0.000, 'REAL', 'Leitura inicial de instalacao'
+FROM contadores c
+JOIN utilizadores u ON u.nome_utilizador = 'maria.leitora'
+WHERE c.numero_serie = 'H2O-DEMO-0001';
+
+INSERT IGNORE INTO leituras
+    (id, contador_id, utilizador_id, data_leitura, valor_m3, tipo, observacao)
+SELECT UUID_TO_BIN(UUID()), c.id, u.id, '2026-02-01 09:30:00', 14.500, 'REAL', 'Leitura mensal regular'
+FROM contadores c
+JOIN utilizadores u ON u.nome_utilizador = 'maria.leitora'
+WHERE c.numero_serie = 'H2O-DEMO-0001';
+
+INSERT IGNORE INTO leituras
+    (id, contador_id, utilizador_id, data_leitura, valor_m3, tipo, observacao)
+SELECT UUID_TO_BIN(UUID()), c.id, u.id, '2026-03-01 10:15:00', 31.800, 'REAL', 'Leitura mensal regular'
+FROM contadores c
+JOIN utilizadores u ON u.nome_utilizador = 'maria.leitora'
+WHERE c.numero_serie = 'H2O-DEMO-0001';
+
+INSERT IGNORE INTO leituras
+    (id, contador_id, utilizador_id, data_leitura, valor_m3, tipo, observacao)
+SELECT UUID_TO_BIN(UUID()), c.id, u.id, '2026-01-01 08:30:00', 0.000, 'REAL', 'Leitura inicial de instalacao'
+FROM contadores c
+JOIN utilizadores u ON u.nome_utilizador = 'maria.leitora'
+WHERE c.numero_serie = 'H2O-DEMO-0002';
+
+INSERT IGNORE INTO leituras
+    (id, contador_id, utilizador_id, data_leitura, valor_m3, tipo, observacao)
+SELECT UUID_TO_BIN(UUID()), c.id, u.id, '2026-02-01 11:00:00', 22.000, 'REAL', 'Leitura mensal regular'
+FROM contadores c
+JOIN utilizadores u ON u.nome_utilizador = 'maria.leitora'
+WHERE c.numero_serie = 'H2O-DEMO-0002';
+
