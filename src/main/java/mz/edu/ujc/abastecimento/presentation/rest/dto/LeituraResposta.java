@@ -20,6 +20,15 @@ public record LeituraResposta(
 ) {
 
     public static LeituraResposta de(Leitura leitura) {
+        String leitorNome = null;
+        try {
+            if (leitura.getUtilizador() != null) {
+                leitorNome = leitura.getUtilizador().getNome();
+            }
+        } catch (Exception ignored) {
+            // Caso o proxy não esteja inicializado fora de sessão
+        }
+
         return new LeituraResposta(
                 leitura.getId(),
                 leitura.getContador().getId(),
@@ -29,7 +38,7 @@ public record LeituraResposta(
                 leitura.getDataLeitura(),
                 leitura.getValorM3(),
                 leitura.getTipo(),
-                leitura.getUtilizador() == null ? null : leitura.getUtilizador().getNome(),
+                leitorNome,
                 leitura.getObservacao()
         );
     }

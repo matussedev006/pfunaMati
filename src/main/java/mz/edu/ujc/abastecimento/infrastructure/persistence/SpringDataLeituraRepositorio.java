@@ -17,10 +17,10 @@ public interface SpringDataLeituraRepositorio extends JpaRepository<Leitura, UUI
     @EntityGraph(attributePaths = {"contador", "contador.ligacao", "contador.ligacao.cliente", "utilizador"})
     List<Leitura> findTop50ByOrderByDataLeituraDesc();
 
-    @EntityGraph(attributePaths = {"contador", "contador.ligacao", "contador.ligacao.cliente"})
+    @EntityGraph(attributePaths = {"contador", "contador.ligacao", "contador.ligacao.cliente", "utilizador"})
     Optional<Leitura> findFirstByContador_IdOrderByDataLeituraDesc(UUID contadorId);
 
-    @EntityGraph(attributePaths = {"contador", "contador.ligacao", "contador.ligacao.cliente"})
+    @EntityGraph(attributePaths = {"contador", "contador.ligacao", "contador.ligacao.cliente", "utilizador"})
     List<Leitura> findTop50DistinctByContador_Ligacao_Cliente_Utilizadores_IdOrderByDataLeituraDesc(
             UUID utilizadorId
     );

@@ -11,6 +11,7 @@ import mz.edu.ujc.abastecimento.presentation.rest.dto.LigacaoResposta;
 import mz.edu.ujc.abastecimento.presentation.rest.dto.NotificacaoVencimentoResposta;
 import mz.edu.ujc.abastecimento.presentation.rest.dto.PortalClienteResposta;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -22,6 +23,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/v1/portal")
+@Transactional(readOnly = true)
 public class PortalClienteControlador {
 
     private final SpringDataClienteRepositorio clientes;
