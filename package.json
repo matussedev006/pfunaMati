@@ -1,0 +1,10 @@
+{
+  "name": "pfunamati",
+  "version": "0.1.0",
+  "description": "Sistema de Gestão de Abastecimento de Água - pfunaMati",
+  "scripts": {
+    "dev": "mvnw.cmd spring-boot:run",
+    "start": "mvnw.cmd spring-boot:run",
+    "build": "mvnw.cmd clean package"
+  }
+}
